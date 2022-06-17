@@ -21,10 +21,9 @@ console.log('yo');
     event.preventDefault();
     let seasonInput = event.target.season.value;
     let roundInput = event.target.round.value;
-    let raceInfo = await getRaceInfo(seasonInput, roundInput);
-    //let driverInfo = await getDriverInfo(driver);
-    // console.log(raceInfo);
-    // console.log(driverInfo);
+      let raceInfo = await getRaceInfo(seasonInput, roundInput);
+      console.log(raceInfo);
+      console.log(typeof raceInfo);
     buildRaceInfoCard(raceInfo);
     event.target.season.value = "";
     event.target.round.value = "";
@@ -36,27 +35,23 @@ console.log('yo');
   async function getRaceInfo(seasonYear, roundNum) {
     console.log(`seasonYear is ${seasonYear}`);
       console.log(`roundNum is ${roundNum}`);
-      raceAPIurl = `http://ergast.com/api/f1/${seasonYear}/${roundNum}/results`;
+      raceAPIurl = `http://ergast.com/api/f1/${seasonYear}/${roundNum}/driverStandings.json`;
       console.log(raceAPIurl);
     try {
       let race_response = await fetch(raceAPIurl)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not OK");
-          }
-          return response.blob();
+        .then((result) => result.json())
+          .then((output) => {
+            results_list =
+              output.MRData.StandingsTable.StandingsLists[0].DriverStandings;
+              console.log("Output: ", results_list);              
+              let winningDriver = results_list[0]["Driver"];
+              let x = 3
+              console.log(results_list[0]['Driver']['nationality']);
+              console.log(results_list);
+              console.log(typeof results_list);
+            return results_list;
         })
-        .catch((error) => {
-          console.error(
-            "There has been a problem with your fetch operation:",
-            error
-          );
-        });
-        console.log()
-        let race_data = await race_response.json();
-        console.log(race_data);
-
-      return race_data;
+        .catch((err) => console.error(err));
     } catch (err) {
       console.log(err);
     }
@@ -79,7 +74,13 @@ console.log('yo');
 
     //create card body
     const cardBody = document.createElement("div");
-    cardBody.className = "card-body";
+      cardBody.className = "card-body";
+    //   const results_list = document.createElement('ul')
+    //   for (i = 0; i <= 10; i++) {
+    //       let finisher = document.createElement("li");
+    //       finisher.innerHTML = raceInfoObj['position'];
+    //     console.log('race')
+    //   }
 
     const raceTitle = document.createElement("h5");
     raceTitle.className = "card-title";
