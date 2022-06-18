@@ -1,28 +1,20 @@
-console.log('yo');
-
-// standingTable
-// ^^ id for div to put table of info
-
-// API address
-// http[s]://ergast.com/api/f1/<season>/<round>/...
-// position, (time), points, driver name, -->driver nationality<--, and constructor name
 
 {
   // get form
   let form = document.getElementById("raceInputForm");
 
-  // get info from input, <form name="season">
   // handleEvent --> first set function for click
   async function handleSubmit(event) {
     event.preventDefault();
     let seasonInput = event.target.season.value;
     let roundInput = event.target.round.value;
     let raceInfo = await getRaceInfo(seasonInput, roundInput);
-    // get HTML card-builder function from other JS module:
+    // get info from input, send to card-builder output
     buildRaceInfoCard(raceInfo);
     event.target.season.value = "";
     event.target.round.value = "";
   }
+
   //addEventListener
   form.addEventListener("submit", handleSubmit);
 
@@ -49,102 +41,87 @@ console.log('yo');
      card.className = "card";
 
      // card title
-     // Season: jsonObj[‘season’]
-     // Round:  jsonObj[‘round’]
      const cardTitle = document.createElement("h4");
      let seasonYear = raceInfoObj["season"];
      let roundNum = raceInfoObj["round"];
      cardTitle.className = "card-title";
      cardTitle.innerHTML = `Results for Round ${roundNum} of the ${seasonYear} Season:`;
+     card.append(cardTitle);
 
      //create card body
      const cardBody = document.createElement("div");
      cardBody.className = "card-body";
-
-     // create header for race results table
-     const rowHeader = document.createElement("ul");
-     rowHeader.className = "list-group list-group-horizontal";
-     cardBody.append(rowHeader);
-     const positionHead = document.createElement("li");
-     positionHead.className = "list-group-item fs-lg fw-bold";
-     positionHead.innerHTML = "Position:";
-     cardBody.append(positionHead);
-     const driverHead = document.createElement("li");
-     driverHead.className = "list-group-item fs-lg fw-bold";
-     driverHead.innerHTML = "Driver:";
-     cardBody.append(driverHead);
-     const nationHead = document.createElement("li");
-     nationHead.className = "list-group-item fs-lg fw-bold";
-     nationHead.innerHTML = "Nationality:";
-     cardBody.append(nationHead);
-     const constructorHead = document.createElement("li");
-     constructorHead.className = "list-group-item fs-lg fw-bold";
-     constructorHead.innerHTML = "Constructor:";
-     cardBody.append(constructorHead);
-     const pointsHead = document.createElement("li");
-     pointsHead.className = "list-group-item fs-lg fw-bold";
-     pointsHead.innerHTML = "Points:";
-     cardBody.append(pointsHead);
-
-     // Position: jsonObj[‘DriverStandings’][index][‘position’]
-     // Driver first name: jsonObj[‘DriverStandings’][index][‘Driver’][‘givenName’]
-     // Driver last name: jsonObj[‘DriverStandings’][index][‘Driver’][‘familyName’]
-     // Driver nationality: jsonObj[‘DriverStandings’][index][‘Driver’][‘nationality’]
-     // Constructor:jsonObj[‘DriverStandings’][index][‘Constructors’][0][‘name’]
-     // Points:jsonObj[‘DriverStandings’][index][‘points’]
-
-     for (i = 0; i <= 10; i++) {
-       const driverResult = document.createElement("ul");
-       driverResult.className = "list-group list-group-horizontal";
-       cardBody.append(driverResult);
-       const position = document.createElement("li");
-       position.className = "list-group-item";
+     
+     // create results table
+     const raceTable = document.createElement('table')
+     raceTable.className = 'table'
+     cardBody.append(raceTable);
+     
+     //create header row with static labels
+     const raceTableHead = document.createElement('thead')
+     raceTable.append(raceTableHead)
+     const raceTableHeadRow = document.createElement('tr')
+     raceTable.append(raceTableHeadRow)
+     const raceTableHeadPos = document.createElement('th')
+     raceTableHeadPos.scope = 'col'
+     raceTableHeadPos.innerHTML = 'Position:'
+     raceTableHeadRow.append(raceTableHeadPos)
+     const raceTableHeadDrName = document.createElement('th')
+     raceTableHeadDrName.scope = 'col'
+     raceTableHeadDrName.innerHTML = 'Driver:'
+     raceTableHeadRow.append(raceTableHeadDrName)
+     const raceTableHeadDrNat = document.createElement('th')
+     raceTableHeadDrNat.scope = 'col'
+     raceTableHeadDrNat.innerHTML = 'Nationality:'
+     raceTableHeadRow.append(raceTableHeadDrNat)
+     const raceTableHeadConstr = document.createElement('th')
+     raceTableHeadConstr.scope = 'col'
+     raceTableHeadConstr.innerHTML = 'Constructor:'
+     raceTableHeadRow.append(raceTableHeadConstr)
+     const raceTableHeadPoints = document.createElement('th')
+     raceTableHeadPoints.scope = 'col'
+     raceTableHeadPoints.innerHTML = 'Points:'
+     raceTableHeadRow.append(raceTableHeadPoints)  
+       
+     const raceTableBody = document.createElement('tbody')
+     raceTable.append(raceTableBody);
+     
+     //loop through data and create table rows for first 10 entries
+     for (i = 0; i < 10; i++) {
+       const driverResult = document.createElement("tr");
+       driverResult.scope = "row";
+       raceTable.append(driverResult);
+       const position = document.createElement("td");
        position.innerHTML = raceInfoObj["DriverStandings"][i]["position"];
-       cardBody.append(position);
-       const driverName = document.createElement("li");
-       driverName.className = "list-group-item";
+       driverResult.append(position);
+       const driverName = document.createElement("td");
        let driverFirst =
          raceInfoObj["DriverStandings"][i]["Driver"]["givenName"];
        let driverLast =
          raceInfoObj["DriverStandings"][i]["Driver"]["familyName"];
        driverName.innerHTML = `${driverFirst} ${driverLast}`;
-       raceInfoObj["DriverStandings"][i]["Driver"]["givenName"];
-       cardBody.append(driverName);
-       const driverNation = document.createElement("li");
-       driverNation.className = "list-group-item";
+       driverResult.append(driverName);
+       const driverNation = document.createElement("td");
        driverNation.innerHTML =
          raceInfoObj["DriverStandings"][i]["Driver"]["nationality"];
-       cardBody.append(driverNation);
-       const constructor = document.createElement("li");
-       constructor.className = "list-group-item";
+       driverResult.append(driverNation);
+       const constructor = document.createElement("td");
        constructor.innerHTML =
          raceInfoObj["DriverStandings"][i]["Constructors"][0]["name"];
-       cardBody.append(constructor);
-       const points = document.createElement("li");
-       points.className = "list-group-item";
+       driverResult.append(constructor);
+       const points = document.createElement("td");
        points.innerHTML = raceInfoObj["DriverStandings"][i]["points"];
-       cardBody.append(points);
-     }
-
-     //Append title to card body
-     cardBody.append(cardTitle);
+       driverResult.append(points);
+     } 
 
      //Add card body to card div
      card.append(cardBody);
 
-     //create card body
+     //get section to add results info
      const raceDisplay = document.getElementById("standingTable");
 
-     // add the new column to our display
+     // add the race results card to the display
      raceDisplay.append(card);
    }
   
 }
-
-// function include(filePath) {
-//   const scriptTag = document.createElement("script");
-//   scriptTag.src = filePath;
-//   document.body.appendChild(scriptTag);
-// }
-
-// include("./results.js");
